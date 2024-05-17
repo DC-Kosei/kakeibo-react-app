@@ -1,0 +1,28 @@
+.transaction-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.transaction-form input,
+.transaction-form select,
+.transaction-form button {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.transaction-form button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.transaction-form button:hover {
+    background-color: #0056b3;
+}
+
+.error {
+    color: red;
+}

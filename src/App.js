@@ -1,10 +1,10 @@
-// App.js
 import React, { useState, useEffect } from 'react';
+import './index.css';
 import TransactionForm from './TransactionForm';
 import TransactionTable from './TransactionTable';
 import TransactionGraph from './TransactionGraph';
 import TransactionExporter from './TransactionExporter';
-
+import PaymentDeadlineApp from './PaymentDeadlingApp';
 
 const App = () => {
   const [transactions, setTransactions] = useState([]);
@@ -49,10 +49,14 @@ const App = () => {
 
   return (
     <div>
-      <h1>家計簿管理アプリ</h1>
+      
+      <h1 className='title-frame'>家計簿管理アプリ</h1>
+      <PaymentDeadlineApp/>
+
+
       <TransactionForm onAddTransaction={addTransaction} categories={categories} onAddCategory={addCategory} />
       <div style={{ marginBottom: '20px' }}></div>
-      <TransactionExporter transactions={transactions}/>
+      <TransactionExporter transactions={transactions} />
       <TransactionTable transactions={transactions} onDelete={deleteTransaction} onEdit={editTransaction} />
       <TransactionGraph transactions={transactions} />
     </div>

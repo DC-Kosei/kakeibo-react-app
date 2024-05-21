@@ -4,7 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-/money-app/sample.txt
+/src/sample.txt
 # testing
 /coverage
 

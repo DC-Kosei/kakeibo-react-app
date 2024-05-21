@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 /src/sample.txt
+/src/donarudo.txt
 # testing
 /coverage
 

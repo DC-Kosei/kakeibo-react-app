@@ -1,20 +1,22 @@
-// TransactionTable.js
 import React, { useState } from 'react';
 import EditTransactionForm from './EditTransactionForm';
 import './TransactionTable.css';
 
 const TransactionTable = ({ transactions, categories, onDelete, onEdit }) => {
     const [editIndex, setEditIndex] = useState(null);
-    const [sortBy, setSortBy] = useState('date'); // 初期ソートキーは日付
-    const [sortDirection, setSortDirection] = useState('asc'); // 初期ソート方向は昇順
-    const [searchTerm, setSearchTerm] = useState(''); // 検索用の状態
+    const [sortBy, setSortBy] = useState('date');
+    const [sortDirection, setSortDirection] = useState('asc');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const handleEdit = (index) => {
-        setEditIndex(index);
+    const handleEdit = (id) => {
+        const index = transactions.findIndex(transaction => transaction.id === id);
+        if (index !== -1) {
+            setEditIndex(index);
+        }
     };
 
     const handleUpdate = (updatedTransaction) => {
-        onEdit(editIndex, updatedTransaction);
+        onEdit(updatedTransaction.id, updatedTransaction);
         setEditIndex(null);
     };
 
@@ -23,40 +25,41 @@ const TransactionTable = ({ transactions, categories, onDelete, onEdit }) => {
     };
 
     const handleToggleSort = (key) => {
-        // 現在のソートキーとトグルする
         if (sortBy === key) {
-            // ソートキーが同じ場合は方向をトグル
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
-            // 新しいソートキーに切り替える
             setSortBy(key);
-            setSortDirection('asc'); // 初期化
+            setSortDirection('asc');
         }
     };
 
-    const handleDelete = (index) => {
-        const confirmDelete = window.confirm('本当に削除してもよろしいですか？');
-        if (confirmDelete) {
-            onDelete(index);
-        }
+    const handleDelete = (id) => {
+        setTimeout(() => {
+            const confirmDelete = window.confirm('本当に削除してもよろしいですか？');
+            if (confirmDelete) {
+                onDelete(id);
+            }
+        }, 100);
     };
 
-    // ソート関数
     const sortFunction = (a, b) => {
         const sortOrder = sortDirection === 'asc' ? 1 : -1;
-        // 数値の場合は直接比較、文字列の場合はロケールで比較
         const compareResult = a[sortBy] < b[sortBy] ? -1 : a[sortBy] > b[sortBy] ? 1 : 0;
         return compareResult * sortOrder;
     };
 
     const sortedTransactions = [...transactions].sort(sortFunction);
 
-    // タイトル検索によるフィルタリング
     const filteredTransactions = sortedTransactions.filter(transaction => transaction.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ja-JP', options);
+    };
 
     return (
         <>
-            {/* 検索用の入力フィールド */}
             <input type="text" placeholder="タイトル検索" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
 
             <table className="transaction-table">
@@ -71,16 +74,16 @@ const TransactionTable = ({ transactions, categories, onDelete, onEdit }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredTransactions.map((transaction, index) => (
-                        <tr key={index}>
-                            <td>{transaction.date.split('T')[0]}</td>
+                    {filteredTransactions.map((transaction) => (
+                        <tr key={transaction.id}>
+                            <td>{formatDate(transaction.date)}</td>
                             <td>{transaction.title}</td>
-                            <td>{transaction.amount}</td>
+                            <td>{transaction.amount}円</td>
                             <td>{transaction.category}</td>
                             <td>{transaction.type === 'income' ? '収入' : '支出'}</td>
                             <td>
-                                <button onClick={() => handleEdit(index)}>編集</button>
-                                <button onClick={() => handleDelete(index)}>削除</button>
+                                <button onClick={() => handleEdit(transaction.id)}>編集</button>
+                                <button onClick={() => handleDelete(transaction.id)}>削除</button>
                             </td>
                         </tr>
                     ))}

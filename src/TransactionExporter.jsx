@@ -1,6 +1,5 @@
 import React from 'react';
 import { CSVLink } from 'react-csv';
-
 const TransactionExporter = ({ transactions, graphRef }) => {
     
 
@@ -23,7 +22,7 @@ const TransactionExporter = ({ transactions, graphRef }) => {
     return (
         <div>
             <CSVLink data={csvData} headers={csvHeaders} filename={'収入・支出データ.csv'}>
-                <button>Export to CSV</button>
+                <button>CSVエクスポート</button>
             </CSVLink>
         </div>
     );

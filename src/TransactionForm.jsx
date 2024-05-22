@@ -1,4 +1,6 @@
+// TransactionForm.js
 import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import './TransactionForm.css';
 
 const TransactionForm = ({ onAddTransaction, categories, onAddCategory }) => {
@@ -28,6 +30,7 @@ const TransactionForm = ({ onAddTransaction, categories, onAddCategory }) => {
             return;
         }
         const transaction = {
+            id: uuidv4(), // ユニークIDを追加
             title,
             amount: parseFloat(amount),
             type,

@@ -16,7 +16,9 @@ const App = () => {
   useEffect(() => {
     const storedTransactions = localStorage.getItem('transactions');
     if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions));
+      const parsedTransactions = JSON.parse(storedTransactions);
+      setTransactions(parsedTransactions);
+      calculateBalance(parsedTransactions);
     }
   }, []);
 
@@ -28,14 +30,14 @@ const App = () => {
   };
 
   const deleteTransaction = (id) => {
-    const newTransactions = transactions.filter((transaction) => transaction.id !== id);
+    const newTransactions = transactions.filter(transaction => transaction.id !== id);
     setTransactions(newTransactions);
     localStorage.setItem('transactions', JSON.stringify(newTransactions));
     calculateBalance(newTransactions);
   };
 
   const editTransaction = (id, updatedTransaction) => {
-    const newTransactions = transactions.map((transaction) =>
+    const newTransactions = transactions.map(transaction =>
       transaction.id === id ? updatedTransaction : transaction
     );
     setTransactions(newTransactions);

@@ -1,75 +1,100 @@
+// TransactionTable.js
 import React, { useState } from 'react';
+import EditTransactionForm from './EditTransactionForm';
 import './TransactionTable.css';
 
-const TransactionTable = ({ transactions, onDelete, onEdit }) => {
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+const TransactionTable = ({ transactions, categories, onDelete, onEdit }) => {
+    const [editIndex, setEditIndex] = useState(null);
+    const [sortBy, setSortBy] = useState('date'); // 初期ソートキーは日付
+    const [sortDirection, setSortDirection] = useState('asc'); // 初期ソート方向は昇順
+    const [searchTerm, setSearchTerm] = useState(''); // 検索用の状態
 
-    const sortTransactions = (key) => {
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
+    const handleEdit = (index) => {
+        setEditIndex(index);
     };
 
-    const sortedTransactions = [...transactions].sort((a, b) => {
-        if (sortConfig.key) {
-            const aValue = a[sortConfig.key];
-            const bValue = b[sortConfig.key];
-            if (sortConfig.direction === 'asc') {
-                return aValue > bValue ? 1 : -1;
-            } else {
-                return aValue < bValue ? 1 : -1;
-            }
-        }
-        return 0;
-    });
+    const handleUpdate = (updatedTransaction) => {
+        onEdit(editIndex, updatedTransaction);
+        setEditIndex(null);
+    };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '日付なし';
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-        return `${year}年${month}月${day}日`;
+    const handleCancel = () => {
+        setEditIndex(null);
+    };
+
+    const handleToggleSort = (key) => {
+        // 現在のソートキーとトグルする
+        if (sortBy === key) {
+            // ソートキーが同じ場合は方向をトグル
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            // 新しいソートキーに切り替える
+            setSortBy(key);
+            setSortDirection('asc'); // 初期化
+        }
     };
 
     const handleDelete = (index) => {
-        onDelete(index);
+        const confirmDelete = window.confirm('本当に削除してもよろしいですか？');
+        if (confirmDelete) {
+            onDelete(index);
+        }
     };
 
-    const handleEdit = (index) => {
-        onEdit(index);
+    // ソート関数
+    const sortFunction = (a, b) => {
+        const sortOrder = sortDirection === 'asc' ? 1 : -1;
+        // 数値の場合は直接比較、文字列の場合はロケールで比較
+        const compareResult = a[sortBy] < b[sortBy] ? -1 : a[sortBy] > b[sortBy] ? 1 : 0;
+        return compareResult * sortOrder;
     };
+
+    const sortedTransactions = [...transactions].sort(sortFunction);
+
+    // タイトル検索によるフィルタリング
+    const filteredTransactions = sortedTransactions.filter(transaction => transaction.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-        <table className="transaction-table">
-            <thead>
-                <tr>
-                    <th onClick={() => sortTransactions('date')}>日付</th>
-                    <th onClick={() => sortTransactions('title')}>タイトル</th>
-                    <th onClick={() => sortTransactions('amount')}>金額</th>
-                    <th onClick={() => sortTransactions('category')}>カテゴリ</th>
-                    <th onClick={() => sortTransactions('type')}>種類</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sortedTransactions.map((transaction, index) => (
-                    <tr key={index}>
-                        <td>{formatDate(transaction.date)}</td>
-                        <td>{transaction.title}</td>
-                        <td>{transaction.amount}</td>
-                        <td>{transaction.category}</td>
-                        <td>{transaction.type === 'income' ? '収入' : '支出'}</td>
-                        <td>
-                            <button onClick={() => handleDelete(index)}>削除</button>
-                            <button onClick={() => handleEdit(index)}>編集</button>
-                        </td>
+        <>
+            {/* 検索用の入力フィールド */}
+            <input type="text" placeholder="タイトル検索" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+
+            <table className="transaction-table">
+                <thead>
+                    <tr>
+                        <th onClick={() => handleToggleSort('date')}>日付</th>
+                        <th onClick={() => handleToggleSort('title')}>タイトル</th>
+                        <th onClick={() => handleToggleSort('amount')}>金額</th>
+                        <th onClick={() => handleToggleSort('category')}>カテゴリ</th>
+                        <th onClick={() => handleToggleSort('type')}>種類</th>
+                        <th>操作</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {filteredTransactions.map((transaction, index) => (
+                        <tr key={index}>
+                            <td>{transaction.date.split('T')[0]}</td>
+                            <td>{transaction.title}</td>
+                            <td>{transaction.amount}</td>
+                            <td>{transaction.category}</td>
+                            <td>{transaction.type === 'income' ? '収入' : '支出'}</td>
+                            <td>
+                                <button onClick={() => handleEdit(index)}>編集</button>
+                                <button onClick={() => handleDelete(index)}>削除</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {editIndex !== null && (
+                <EditTransactionForm
+                    transaction={transactions[editIndex]}
+                    categories={categories}
+                    onUpdate={handleUpdate}
+                    onCancel={handleCancel}
+                />
+            )}
+        </>
     );
 };
 
